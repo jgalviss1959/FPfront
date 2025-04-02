@@ -33,17 +33,22 @@ export const Tooltip = ({
 }: TooltipProps) => {
   const [isActive, setIsActive] = useState(false);
   const updateActive = () => setIsActive(true);
-  
+
   useEffect(() => {
     const cancelActive = () => setIsActive(false);
+    let clickTimeoutId: NodeJS.Timeout | null = null;
+
     if (isActive) {
-      setTimeout(() => window.addEventListener('click', cancelActive));
+      clickTimeoutId = setTimeout(() => window.addEventListener('click', cancelActive));
       window.addEventListener('scroll', cancelActive);
     }
 
     return () => {
-      removeEventListener('click', cancelActive);
-      removeEventListener('scroll', cancelActive);
+      if (clickTimeoutId) {
+        clearTimeout(clickTimeoutId); // Limpiar el timeout si el componente se desmonta antes
+      }
+      window.removeEventListener('click', cancelActive);
+      window.removeEventListener('scroll', cancelActive);
     };
   }, [isActive]);
 
